@@ -18,9 +18,6 @@ export default defineConfig(({ mode }) => ({
   define: {
     global: 'globalThis',
     'process.env': {},
-    'require': 'undefined',
-    'module': 'undefined',
-    'exports': 'undefined',
   },
   build: {
     assetsDir: 'assets',
