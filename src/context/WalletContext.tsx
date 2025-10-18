@@ -1,11 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { WalletState, KYCStatus } from '@/types/wallet';
 
+// Polyfill for require function
+if (typeof window !== 'undefined') {
+  (window as any).require = (window as any).require || function() { return {}; };
+}
+
 // Extend Window interface for HashPack and Blade
 declare global {
   interface Window {
     hashconnect?: any;
     bladeConnector?: any;
+    require?: any;
   }
 }
 
@@ -59,8 +65,16 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem('hashconnectData');
       localStorage.removeItem('hashconnectPairingString');
       
-      // Initialize HashConnect
-      const { HashConnect, HashConnectTypes } = await import('@hashgraph/hashconnect');
+      // Initialize HashConnect with better error handling
+      let HashConnect, HashConnectTypes;
+      try {
+        const hashconnectModule = await import('@hashgraph/hashconnect');
+        HashConnect = hashconnectModule.HashConnect;
+        HashConnectTypes = hashconnectModule.HashConnectTypes;
+      } catch (importError) {
+        console.error('Failed to import HashConnect:', importError);
+        throw new Error('HashConnect library failed to load. Please refresh the page and try again.');
+      }
       
       const hashconnect = new HashConnect();
       
