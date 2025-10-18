@@ -2,16 +2,19 @@ import { useState } from 'react';
 import axios, { AxiosRequestConfig } from 'axios';
 import { toast } from '@/hooks/use-toast';
 
-// Force production URL for deployed frontend
-const isProduction = window.location.hostname.includes('vercel.app') || 
-                     window.location.hostname.includes('hedera-ramp') ||
-                     window.location.hostname !== 'localhost' ||
-                     import.meta.env.PROD;
+// Function to get API base URL at runtime
+const getApiBaseUrl = () => {
+  // Force production URL for deployed frontend
+  const isProduction = window.location.hostname.includes('vercel.app') || 
+                       window.location.hostname.includes('hedera-ramp') ||
+                       window.location.hostname !== 'localhost' ||
+                       import.meta.env.PROD;
 
-// Always use production URL if not on localhost
-const API_BASE_URL = isProduction 
-  ? 'https://hedera-ramp.onrender.com'
-  : 'http://localhost:5000';
+  // Always use production URL if not on localhost
+  return isProduction 
+    ? 'https://hedera-ramp.onrender.com'
+    : 'http://localhost:5000';
+};
 
 interface APIResponse<T = any> {
   data: T | null;
@@ -40,7 +43,7 @@ export const useAPI = () => {
         },
       };
 
-      const response = await axios(`${API_BASE_URL}${endpoint}`, config);
+      const response = await axios(`${getApiBaseUrl()}${endpoint}`, config);
       
       return {
         data: response.data,

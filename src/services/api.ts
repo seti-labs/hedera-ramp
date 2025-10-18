@@ -5,33 +5,46 @@
 
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-// Debug environment variables
-console.log('Environment check:', {
-  VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
-  PROD: import.meta.env.PROD,
-  MODE: import.meta.env.MODE
-});
+// Function to get API base URL at runtime
+const getApiBaseUrl = () => {
+  // Debug environment variables
+  console.log('Environment check:', {
+    VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    PROD: import.meta.env.PROD,
+    MODE: import.meta.env.MODE,
+    hostname: window.location.hostname
+  });
 
-// Force production URL for deployed frontend
-const isProduction = window.location.hostname.includes('vercel.app') || 
-                     window.location.hostname.includes('hedera-ramp') ||
-                     window.location.hostname !== 'localhost' ||
-                     import.meta.env.PROD;
+  // Force production URL for deployed frontend
+  const isProduction = window.location.hostname.includes('vercel.app') || 
+                       window.location.hostname.includes('hedera-ramp') ||
+                       window.location.hostname !== 'localhost' ||
+                       import.meta.env.PROD;
 
-// Always use production URL if not on localhost
-const API_BASE_URL = isProduction 
-  ? 'https://hedera-ramp.onrender.com/api'
-  : 'http://localhost:5000/api';
+  // Always use production URL if not on localhost
+  const API_BASE_URL = isProduction 
+    ? 'https://hedera-ramp.onrender.com/api'
+    : 'http://localhost:5000/api';
 
-console.log('Environment check:', {
-  hostname: window.location.hostname,
-  isProduction,
-  API_BASE_URL
-});
+  console.log('Environment check:', {
+    hostname: window.location.hostname,
+    isProduction,
+    API_BASE_URL
+  });
 
-// Create axios instance
+  // Additional debug for production
+  if (isProduction) {
+    console.log('🚀 PRODUCTION MODE: Using backend URL:', API_BASE_URL);
+  } else {
+    console.log('🏠 DEVELOPMENT MODE: Using backend URL:', API_BASE_URL);
+  }
+
+  return API_BASE_URL;
+};
+
+// Create axios instance with runtime URL detection
 const api: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
