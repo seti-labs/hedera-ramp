@@ -23,7 +23,11 @@ const API_BASE_URL = isProduction
   ? 'https://hedera-ramp.onrender.com/api'
   : 'http://localhost:5000/api';
 
-console.log('Using API_BASE_URL:', API_BASE_URL);
+console.log('Environment check:', {
+  hostname: window.location.hostname,
+  isProduction,
+  API_BASE_URL
+});
 
 // Create axios instance
 const api: AxiosInstance = axios.create({

@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => ({
         assetFileNames: (assetInfo) => {
           // Keep SVG files in root for easier access
           if (assetInfo.name && assetInfo.name.endsWith('.svg')) {
-            return '[name].[ext]';
+            return '[name].[hash].[ext]';
           }
           return 'assets/[name].[hash].[ext]';
         },
