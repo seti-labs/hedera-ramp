@@ -11,16 +11,9 @@ from flask_migrate import Migrate
 from config import config
 from models import db
 
-# Try to import Hedera service (optional - requires Java)
-try:
-    from hedera_service import init_hedera_service
-    HEDERA_AVAILABLE = True
-except Exception as e:
-    print(f"⚠️  Hedera service not available: {e}")
-    print("   The API will run without Hedera integration.")
-    print("   To enable Hedera, install Java from https://www.java.com")
-    HEDERA_AVAILABLE = False
-    init_hedera_service = None
+# Hedera service is optional for basic functionality
+HEDERA_AVAILABLE = False
+init_hedera_service = None
 
 # Import blueprints
 from routes.auth import auth_bp

@@ -3,9 +3,7 @@ services:
     name: hedera-ramp-backend
     env: python
     plan: free
-    buildCommand: |
-      pip install -r requirements.txt
-      python -c "from app import app, db; db.create_all()"
+    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT wsgi:app
     envVars:
       - key: FLASK_ENV
