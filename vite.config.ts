@@ -23,7 +23,13 @@ export default defineConfig(({ mode }) => ({
     assetsDir: 'assets',
     rollupOptions: {
       output: {
-        assetFileNames: 'assets/[name].[hash].[ext]',
+        assetFileNames: (assetInfo) => {
+          // Keep SVG files in root for easier access
+          if (assetInfo.name && assetInfo.name.endsWith('.svg')) {
+            return '[name].[ext]';
+          }
+          return 'assets/[name].[hash].[ext]';
+        },
         chunkFileNames: 'assets/[name].[hash].js',
         entryFileNames: 'assets/[name].[hash].js',
       },
