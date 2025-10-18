@@ -1,9 +1,21 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { WalletState, KYCStatus } from '@/types/wallet';
 
-// Polyfill for require function
+// Polyfills for HashConnect
 if (typeof window !== 'undefined') {
   (window as any).require = (window as any).require || function() { return {}; };
+  // Add Buffer polyfill for HashConnect
+  if (!(window as any).Buffer) {
+    (window as any).Buffer = {
+      from: (data: any, encoding?: string) => {
+        if (typeof data === 'string') {
+          return new TextEncoder().encode(data);
+        }
+        return data;
+      },
+      isBuffer: () => false,
+    };
+  }
 }
 
 // Extend Window interface for HashPack and Blade
