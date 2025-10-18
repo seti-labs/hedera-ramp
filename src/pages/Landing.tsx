@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useWallet } from '@/context/WalletContext';
 import api from '@/services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { 
   ArrowRight, 
   Wallet, 
@@ -35,6 +36,14 @@ interface PublicStats {
 }
 
 export default function Landing() {
+  return (
+    <ErrorBoundary>
+      <LandingContent />
+    </ErrorBoundary>
+  );
+}
+
+function LandingContent() {
   const navigate = useNavigate();
   const { wallet } = useWallet();
   const [stats, setStats] = useState<PublicStats | null>(null);
@@ -55,6 +64,19 @@ export default function Landing() {
       setStats(response.data);
     } catch (error) {
       console.error('Failed to load stats:', error);
+      // Set fallback data to prevent breaking
+      setStats({
+        total_users: 0,
+        total_transactions: 0,
+        completed_transactions: 0,
+        total_volume_kes: 0,
+        unique_wallets: 0,
+        onramp_count: 0,
+        offramp_count: 0,
+        recent_transactions: [],
+        daily_activity: [],
+        last_updated: new Date().toISOString()
+      });
     } finally {
       setLoading(false);
     }
@@ -290,24 +312,24 @@ export default function Landing() {
       </section>
 
       {/* Activity Chart */}
-      {stats && stats.daily_activity && stats.daily_activity.length > 0 && (
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-5xl mx-auto">
-              <Card className="shadow-apple-lg border-0">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-2xl flex items-center gap-2">
-                        <BarChart3 className="h-6 w-6" />
-                        Transaction Activity
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">Last 7 days</p>
-                    </div>
-                    <Badge className="bg-foreground text-background">Live</Badge>
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <Card className="shadow-apple-lg border-0">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-2xl flex items-center gap-2">
+                      <BarChart3 className="h-6 w-6" />
+                      Transaction Activity
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">Last 7 days</p>
                   </div>
-                </CardHeader>
-                <CardContent>
+                  <Badge className="bg-foreground text-background">Live</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {stats && stats.daily_activity && stats.daily_activity.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={stats.daily_activity}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
@@ -335,12 +357,19 @@ export default function Landing() {
                       />
                     </LineChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </div>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                    <div className="text-center">
+                      <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No activity data available</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Recent Transactions */}
       <section className="bg-muted/30 py-20">

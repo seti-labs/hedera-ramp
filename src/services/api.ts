@@ -78,6 +78,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
+    console.error('API Error:', {
+      message: error.message,
+      status: error.response?.status,
+      url: error.config?.url,
+      baseURL: error.config?.baseURL
+    });
+
     if (error.response?.status === 401) {
       // Token expired, clear storage and redirect to login
       localStorage.removeItem('access_token');
@@ -85,6 +92,12 @@ api.interceptors.response.use(
       localStorage.removeItem('walletState');
       window.location.href = '/';
     }
+    
+    // Handle network errors gracefully
+    if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+      console.warn('Network error - backend may be unavailable:', error.config?.baseURL);
+    }
+    
     return Promise.reject(error);
   }
 );

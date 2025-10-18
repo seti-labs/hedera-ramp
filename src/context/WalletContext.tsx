@@ -95,9 +95,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           
           if (data.accountIds && data.accountIds.length > 0) {
             const accountId = data.accountIds[0];
-            
-            const newWalletState = {
-              isConnected: true,
+      
+      const newWalletState = {
+        isConnected: true,
               accountId: accountId,
               balance: '0',
               walletType: 'hashpack' as const,
@@ -147,11 +147,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           accountId: result.accountId,
           balance: null, // Will be updated
           walletType: 'blade' as const,
-        };
-        
-        setWallet(newWalletState);
-        localStorage.setItem('walletState', JSON.stringify(newWalletState));
-        
+      };
+      
+      setWallet(newWalletState);
+      localStorage.setItem('walletState', JSON.stringify(newWalletState));
+      
         // Update balance
         updateBalance();
         
