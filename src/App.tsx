@@ -5,11 +5,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WalletProvider } from "@/context/WalletContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
+import Landing from "./pages/Landing";
+import Welcome from "./pages/Welcome";
 import Dashboard from "./pages/Dashboard";
-import OnRamp from "./pages/OnRamp";
-import OffRamp from "./pages/OffRamp";
+import MPesa from "./pages/MPesa";
+import Receipts from "./pages/Receipts";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -38,15 +41,65 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AppLayout>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/onramp" element={<OnRamp />} />
-              <Route path="/offramp" element={<OffRamp />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AppLayout>
+          <Routes>
+            {/* Public pages */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/welcome" element={<Welcome />} />
+            
+            {/* Protected app routes with layout */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <AppLayout><Dashboard /></AppLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/mpesa" 
+              element={
+                <ProtectedRoute>
+                  <AppLayout><MPesa /></AppLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/receipts" 
+              element={
+                <ProtectedRoute>
+                  <AppLayout><Receipts /></AppLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <AppLayout><Profile /></AppLayout>
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Redirect old routes to M-Pesa - Also protected */}
+            <Route 
+              path="/onramp" 
+              element={
+                <ProtectedRoute>
+                  <AppLayout><MPesa /></AppLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/offramp" 
+              element={
+                <ProtectedRoute>
+                  <AppLayout><MPesa /></AppLayout>
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </WalletProvider>
