@@ -19,7 +19,7 @@ services:
       - key: HEDERA_NETWORK
         value: testnet
       - key: CORS_ORIGINS
-        value: https://hedera-ramp.vercel.app,https://hedera-ramp.vercel.app
+        value: https://hedera-ramp.vercel.app,https://hedera-ramp-hub.vercel.app,http://localhost:5173,http://localhost:3000,http://localhost:8080
       - key: MPESA_CONSUMER_KEY
         value: your_mpesa_consumer_key
       - key: MPESA_CONSUMER_SECRET
