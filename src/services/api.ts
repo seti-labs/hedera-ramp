@@ -50,13 +50,23 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and ensure correct base URL
 api.interceptors.request.use(
   (config) => {
+    // Force the correct base URL at request time
+    config.baseURL = getApiBaseUrl();
+    
     const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    console.log('🚀 API Request:', {
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`
+    });
+    
     return config;
   },
   (error) => {

@@ -1,0 +1,29 @@
+{
+  "name": "Hedera Ramp Hub",
+  "short_name": "Hedera Ramp",
+  "description": "Seamless on-ramp and off-ramp solution for Hedera network with M-Pesa integration",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#6366F1",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/hedera-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/hedera-logo.svg",
+      "sizes": "48x48",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/hedera-logo.svg",
+      "sizes": "200x200",
+      "type": "image/svg+xml"
+    }
+  ]
+}
+
