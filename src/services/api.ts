@@ -5,11 +5,25 @@
 
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
+// Debug environment variables
+console.log('Environment check:', {
+  VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+  PROD: import.meta.env.PROD,
+  MODE: import.meta.env.MODE
+});
+
+// Force production URL for deployed frontend
+const isProduction = window.location.hostname.includes('vercel.app') || 
+                     window.location.hostname.includes('hedera-ramp') ||
+                     import.meta.env.PROD;
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.PROD 
+  (isProduction 
     ? 'https://hedera-ramp.onrender.com/api' 
     : 'http://localhost:5000/api'
   );
+
+console.log('Using API_BASE_URL:', API_BASE_URL);
 
 // Create axios instance
 const api: AxiosInstance = axios.create({
