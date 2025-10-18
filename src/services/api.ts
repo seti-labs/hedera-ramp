@@ -15,13 +15,13 @@ console.log('Environment check:', {
 // Force production URL for deployed frontend
 const isProduction = window.location.hostname.includes('vercel.app') || 
                      window.location.hostname.includes('hedera-ramp') ||
+                     window.location.hostname !== 'localhost' ||
                      import.meta.env.PROD;
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (isProduction 
-    ? 'https://hedera-ramp.onrender.com/api' 
-    : 'http://localhost:5000/api'
-  );
+// Always use production URL if not on localhost
+const API_BASE_URL = isProduction 
+  ? 'https://hedera-ramp.onrender.com/api'
+  : 'http://localhost:5000/api';
 
 console.log('Using API_BASE_URL:', API_BASE_URL);
 

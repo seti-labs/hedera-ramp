@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => ({
   },
   define: {
     global: 'globalThis',
+    'process.env': {},
   },
   build: {
     assetsDir: 'assets',
@@ -27,6 +28,9 @@ export default defineConfig(({ mode }) => ({
         entryFileNames: 'assets/[name].[hash].js',
       },
     },
+  },
+  optimizeDeps: {
+    include: ['@hashgraph/hashconnect'],
   },
   base: '/',
 }));
