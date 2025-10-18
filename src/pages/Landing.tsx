@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useWallet } from '@/context/WalletContext';
-import axios from 'axios';
+import { api } from '@/services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { 
   ArrowRight, 
@@ -51,8 +51,7 @@ export default function Landing() {
 
   const loadStats = async () => {
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-      const response = await axios.get(`${API_BASE_URL}/public/stats`);
+      const response = await api.get('/public/stats');
       setStats(response.data);
     } catch (error) {
       console.error('Failed to load stats:', error);
