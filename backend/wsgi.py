@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 WSGI entry point for Hedera Ramp Hub backend
+Production-ready with automatic database initialization
 """
 
 import os
@@ -13,6 +14,7 @@ from app import app
 from models import db
 
 # Initialize database tables on startup
+print("🔄 Initializing database tables...")
 with app.app_context():
     try:
         db.create_all()
