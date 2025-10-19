@@ -474,14 +474,40 @@ MPESA_API_URL=https://sandbox.safaricom.co.ke
 - `GET /api/transactions/` - Get transactions
 - `GET /api/mpesa/rates` - Exchange rates
 
+## 🚀 Deployment
+
+### Frontend (Vercel)
+- **URL:** https://hedera-ramp.vercel.app
+- **Auto-deploys** from `main` branch
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+
+### Backend (Render)
+- **URL:** https://hedera-ramp.onrender.com
+- **Auto-deploys** from `main` branch
+- **Build Command:** `pip install -r requirements.txt`
+- **Start Command:** `gunicorn --bind 0.0.0.0:$PORT wsgi:app`
+
+### ⚠️ Important: CORS Configuration on Render
+
+If you see CORS errors in the browser console, you **MUST** update the `CORS_ORIGINS` environment variable in your Render dashboard:
+
+1. Go to: https://dashboard.render.com
+2. Find your backend service: **hedera-ramp-backend**
+3. Click **"Environment"** tab
+4. Find or add `CORS_ORIGINS` variable
+5. Set value to:
+   ```
+   https://hedera-ramp.vercel.app,http://localhost:5173,http://localhost:8080
+   ```
+6. Click **"Save Changes"** (this will auto-redeploy)
+
+**Why?** Render dashboard environment variables override `render.yaml` settings.
+
 ## 📚 Documentation
 
 - `README.md` - This file (main documentation)
-- `HEDERA_INTEGRATION.md` - Hedera SDK integration guide
-- `FINAL_SUMMARY.md` - Complete feature summary
-- `backend/README.md` - Backend setup guide
-- `backend/API_DOCUMENTATION.md` - Full API reference
-- `backend/MPESA_INTEGRATION.md` - M-Pesa integration guide
+- `INTEGRATIONS.md` - Smart contract & M-Pesa integration guide
 
 ## 🎯 Status
 
