@@ -123,12 +123,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       // Wait for pairing to complete
       return new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
-          reject(new Error('HashPack connection timeout. Please make sure HashPack is unlocked and on Testnet.'));
-        }, 30000);
+          reject(new Error('HashPack connection timeout. Please:\n1. Make sure HashPack is unlocked\n2. Switch HashPack to Testnet\n3. Check for popup blockers\n4. Click the HashPack extension icon if no popup appeared'));
+        }, 60000); // Increased to 60 seconds
 
-        hashconnect.pairingEvent.on((data) => {
+        hashconnect.pairingEvent.once((data) => {
           clearTimeout(timeout);
-          console.log('Pairing successful:', data);
+          console.log('✅ Pairing successful:', data);
           
           if (data.accountIds && data.accountIds.length > 0) {
             const accountId = data.accountIds[0];
