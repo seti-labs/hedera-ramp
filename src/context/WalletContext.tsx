@@ -4,6 +4,7 @@ import { WalletState, KYCStatus } from '@/types/wallet';
 // Polyfills for HashConnect
 if (typeof window !== 'undefined') {
   (window as any).require = (window as any).require || function() { return {}; };
+  
   // Add Buffer polyfill for HashConnect
   if (!(window as any).Buffer) {
     (window as any).Buffer = {
@@ -16,6 +17,16 @@ if (typeof window !== 'undefined') {
       isBuffer: () => false,
     };
   }
+
+  // Add Long.js polyfill for HashConnect/Protobuf
+  // This fixes "Cannot read properties of undefined (reading 'from')" error
+  import('long').then((LongModule) => {
+    const Long = LongModule.default;
+    (window as any).Long = Long;
+    console.log('Long.js polyfill loaded for HashConnect');
+  }).catch((err) => {
+    console.warn('Failed to load Long.js polyfill:', err);
+  });
 }
 
 // Extend Window interface for HashPack and Blade

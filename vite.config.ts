@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ['@hashgraph/hashconnect'],
+    include: ['@hashgraph/hashconnect', 'long'],
   },
   base: '/',
 }));
