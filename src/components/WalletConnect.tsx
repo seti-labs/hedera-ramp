@@ -70,45 +70,51 @@ export const WalletConnect = ({ open, onOpenChange, onSuccess }: WalletConnectPr
     console.log('🔧 Manual HashPack detection override activated');
   };
 
-  // Always allow connection attempt
-  const handleDirectConnect = async () => {
-    setIsConnecting(true);
-    try {
-      // Try to connect directly without detection
-      await connectWallet('hashpack');
-      
-      // After wallet connects, automatically sign up/sign in
-      if (wallet.accountId) {
-        await handleWalletAuth(wallet.accountId, 'hashpack');
-      }
-    } catch (error: any) {
-      console.error('Direct wallet connection failed:', error);
-      toast({
-        title: 'Connection Failed',
-        description: error.message || 'Failed to connect wallet. Make sure HashPack is unlocked and on Testnet.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsConnecting(false);
-    }
-  };
-
   const handleWalletConnect = async () => {
     setIsConnecting(true);
     try {
+      console.log('Starting wallet connection...');
+      
       // Connect to HashPack wallet
       await connectWallet('hashpack');
       
+      console.log('Wallet connected, wallet state:', wallet);
+      
       // After wallet connects, automatically sign up/sign in
-      if (wallet.accountId) {
-        await handleWalletAuth(wallet.accountId, 'hashpack');
-      }
+      // Wait a bit for wallet state to update
+      setTimeout(async () => {
+        const currentWallet = JSON.parse(localStorage.getItem('walletState') || '{}');
+        if (currentWallet.accountId) {
+          console.log('Authenticating with accountId:', currentWallet.accountId);
+          await handleWalletAuth(currentWallet.accountId, 'hashpack');
+        }
+      }, 500);
+      
     } catch (error: any) {
       console.error('Wallet connection failed:', error);
+      
+      // Provide more specific error messages
+      let errorMessage = 'Connection Failed';
+      let errorDetails = '';
+      
+      if (error.message?.includes('timeout')) {
+        errorMessage = 'Connection Timeout';
+        errorDetails = error.message || 'Connection timed out. Please:\n1. Make sure HashPack is unlocked\n2. Switch HashPack to Testnet network\n3. Check for popup blockers\n4. Click the HashPack extension icon to approve';
+      } else if (error.message?.includes('not found') || error.message?.includes('install')) {
+        errorMessage = 'HashPack Not Found';
+        errorDetails = 'Please install HashPack wallet extension from hashpack.app';
+      } else if (error.message?.includes('initialize') || error.message?.includes('init')) {
+        errorMessage = 'Initialization Failed';
+        errorDetails = error.message || 'Failed to initialize HashConnect. Please refresh the page and try again.';
+      } else {
+        errorDetails = error.message || 'An unexpected error occurred. Please try again.';
+      }
+      
       toast({
-        title: 'Connection Failed',
-        description: error.message || 'Failed to connect wallet',
+        title: errorMessage,
+        description: errorDetails,
         variant: 'destructive',
+        duration: 12000, // Show for 12 seconds
       });
     } finally {
       setIsConnecting(false);
@@ -188,7 +194,7 @@ export const WalletConnect = ({ open, onOpenChange, onSuccess }: WalletConnectPr
           <Card className="cursor-pointer hover:shadow-apple transition-all border-2 hover:border-foreground">
             <CardContent className="p-6">
               <Button
-                onClick={hashPackDetected ? handleWalletConnect : handleDirectConnect}
+                onClick={handleWalletConnect}
                 disabled={isConnecting || registering}
                 className="w-full bg-foreground text-background hover:bg-foreground/90 font-semibold rounded-xl py-6"
                 size="lg"
@@ -206,18 +212,23 @@ export const WalletConnect = ({ open, onOpenChange, onSuccess }: WalletConnectPr
                 )}
               </Button>
               <p className="text-xs text-muted-foreground text-center mt-3">
-                Connect your HashPack wallet to get started
+                {hashPackDetected 
+                  ? '✅ HashPack detected - Click to connect'
+                  : '⚠️ HashPack not detected - Install from hashpack.app'
+                }
               </p>
             </CardContent>
           </Card>
 
           {/* Connection Instructions */}
           <div className="bg-muted/50 rounded-xl p-4 text-sm">
-            <p className="font-semibold mb-2 text-center">Ready to Connect</p>
+            <p className="font-semibold mb-2 text-center">Connection Steps</p>
             <div className="space-y-2 text-xs text-muted-foreground">
-              <p>1. <strong>Make sure HashPack is unlocked</strong> and on Testnet</p>
-              <p>2. <strong>Click "Connect HashPack"</strong> above</p>
-              <p>3. <strong>Approve the connection</strong> in the HashPack popup</p>
+              <p>1. <strong>Install HashPack</strong> - Get it from <a href="https://www.hashpack.app/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">hashpack.app</a></p>
+              <p>2. <strong>Unlock HashPack</strong> and switch to <strong>Testnet</strong></p>
+              <p>3. <strong>Click "Connect HashPack"</strong> button above</p>
+              <p>4. <strong>Approve the connection</strong> in the popup</p>
+              <p className="text-amber-600 dark:text-amber-500 mt-2">⚠️ <strong>Note:</strong> Check for popup blockers if you don't see the HashPack approval window</p>
             </div>
           </div>
 

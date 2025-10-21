@@ -81,8 +81,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
   const connectHashPack = async () => {
     try {
-      // Skip detection check - try to connect directly
-      console.log('Attempting to connect to HashPack...');
+      console.log('🔄 Attempting to connect to HashPack...');
 
       // Clear any existing pairing data to force fresh connection
       localStorage.removeItem('hashconnectData');
@@ -99,33 +98,35 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('HashConnect library failed to load. Please refresh the page and try again.');
       }
       
+      // Create HashConnect instance with debug mode
       const hashconnect = new HashConnect();
       
       const appMetadata: HashConnectTypes.AppMetadata = {
         name: 'Hedera Ramp Hub',
         description: 'M-Pesa to HBAR On/Off-Ramp Platform',
         icon: window.location.origin + '/hedera-logo.svg',
-        url: window.location.origin,
+        url: window.location.origin
       };
 
       // Initialize HashConnect
-      await hashconnect.init(appMetadata, 'testnet', false);
+      console.log('🔄 Initializing HashConnect...');
       
-      console.log('HashConnect initialized, connecting to HashPack...');
-
-      // Create new pairing - this should trigger HashPack popup
-      const state = await hashconnect.connect();
-      
-      console.log('HashConnect.connect() called, waiting for HashPack popup...');
-      
-      console.log('Connection state:', state);
+      let initState;
+      try {
+        initState = await hashconnect.init(appMetadata, 'testnet', false);
+        console.log('✅ HashConnect initialized:', initState);
+      } catch (initError) {
+        console.error('❌ HashConnect initialization failed:', initError);
+        throw new Error('Failed to initialize HashConnect. Please:\n1. Make sure HashPack is installed from hashpack.app\n2. Unlock your HashPack wallet\n3. Refresh the page and try again');
+      }
 
       // Wait for pairing to complete
       return new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
-          reject(new Error('HashPack connection timeout. Please:\n1. Make sure HashPack is unlocked\n2. Switch HashPack to Testnet\n3. Check for popup blockers\n4. Click the HashPack extension icon if no popup appeared'));
-        }, 60000); // Increased to 60 seconds
+          reject(new Error('HashPack connection timeout. Please:\n1. Make sure HashPack is unlocked\n2. Switch to Testnet network\n3. Check for popup blockers\n4. Try clicking the HashPack extension icon'));
+        }, 60000); // 60 seconds timeout
 
+        // Listen for pairing event BEFORE calling connect
         hashconnect.pairingEvent.once((data) => {
           clearTimeout(timeout);
           console.log('✅ Pairing successful:', data);
@@ -133,8 +134,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           if (data.accountIds && data.accountIds.length > 0) {
             const accountId = data.accountIds[0];
       
-      const newWalletState = {
-        isConnected: true,
+            const newWalletState = {
+              isConnected: true,
               accountId: accountId,
               balance: '0',
               walletType: 'hashpack' as const,
@@ -150,6 +151,16 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           } else {
             reject(new Error('No account data received from HashPack'));
           }
+        });
+
+        // Trigger the connection - this should open HashPack popup
+        console.log('🔄 Calling hashconnect.connect() to open HashPack...');
+        hashconnect.connect().then((connectionState) => {
+          console.log('HashConnect.connect() returned:', connectionState);
+        }).catch((connectError) => {
+          clearTimeout(timeout);
+          console.error('❌ HashConnect.connect() failed:', connectError);
+          reject(new Error('Failed to open HashPack connection. Please:\n1. Make sure HashPack extension is installed\n2. Click the HashPack extension icon\n3. Check for popup blockers'));
         });
       });
     } catch (error) {
