@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, ArrowDownToLine, ArrowUpFromLine, User, X, Receipt } from 'lucide-react';
+import { LayoutDashboard, ArrowDownToLine, ArrowUpFromLine, User, X, Receipt, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -12,6 +12,7 @@ const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: ArrowUpFromLine, label: 'On-Ramp', path: '/mpesa?tab=onramp' },
   { icon: ArrowDownToLine, label: 'Off-Ramp', path: '/mpesa?tab=offramp' },
+  { icon: GraduationCap, label: 'Student Investments', path: '/investments' },
   { icon: Receipt, label: 'Receipts', path: '/receipts' },
   { icon: User, label: 'Profile', path: '/profile' },
 ];

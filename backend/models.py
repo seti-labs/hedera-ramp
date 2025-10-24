@@ -75,6 +75,128 @@ class User(db.Model):
         return {k: v for k, v in data.items() if v is not None or include_sensitive}
 
 
+class Student(db.Model):
+    """Student model for campus investment platform."""
+    __tablename__ = 'students'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # Student Information
+    student_id = db.Column(db.String(50), unique=True, nullable=False, index=True)
+    university = db.Column(db.String(200), nullable=False)
+    major = db.Column(db.String(100))
+    graduation_year = db.Column(db.Integer, nullable=False)
+    enrollment_status = db.Column(db.String(20), default='active')  # active, graduated, dropped
+    
+    # Verification
+    is_verified = db.Column(db.Boolean, default=False)
+    verification_method = db.Column(db.String(50))  # email, document, manual
+    verified_at = db.Column(db.DateTime)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref='student_profile')
+    investments = db.relationship('StudentInvestment', back_populates='student', lazy=True, cascade='all, delete-orphan')
+    
+    def to_dict(self):
+        """Convert to dictionary for JSON serialization."""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'student_id': self.student_id,
+            'university': self.university,
+            'major': self.major,
+            'graduation_year': self.graduation_year,
+            'enrollment_status': self.enrollment_status,
+            'is_verified': self.is_verified,
+            'verification_method': self.verification_method,
+            'verified_at': self.verified_at.isoformat() if self.verified_at else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
+
+class StudentInvestment(db.Model):
+    """Student investment model for locked investments."""
+    __tablename__ = 'student_investments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    
+    # Investment Details
+    investment_type = db.Column(db.String(50), nullable=False)  # savings, crypto, stocks, bonds
+    amount = db.Column(db.Numeric(20, 8), nullable=False)  # Amount invested
+    currency = db.Column(db.String(10), default='KES')  # KES, USD, HBAR
+    
+    # Lock Mechanism
+    lock_period_months = db.Column(db.Integer, nullable=False)  # How long money is locked
+    lock_start_date = db.Column(db.DateTime, nullable=False)
+    lock_end_date = db.Column(db.DateTime, nullable=False)
+    is_locked = db.Column(db.Boolean, default=True)
+    
+    # Returns
+    expected_return_rate = db.Column(db.Numeric(5, 4))  # Annual return rate (e.g., 0.05 for 5%)
+    actual_return = db.Column(db.Numeric(20, 8), default=0)  # Actual returns earned
+    
+    # Status
+    status = db.Column(db.String(20), default='active')  # active, matured, withdrawn, cancelled
+    withdrawal_requested_at = db.Column(db.DateTime)
+    withdrawn_at = db.Column(db.DateTime)
+    
+    # Blockchain Integration
+    hedera_transaction_id = db.Column(db.String(100))  # Hedera transaction ID
+    smart_contract_address = db.Column(db.String(100))  # Smart contract address if applicable
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    student = db.relationship('Student', back_populates='investments')
+    
+    def to_dict(self):
+        """Convert to dictionary for JSON serialization."""
+        return {
+            'id': self.id,
+            'student_id': self.student_id,
+            'investment_type': self.investment_type,
+            'amount': float(self.amount) if self.amount else 0,
+            'currency': self.currency,
+            'lock_period_months': self.lock_period_months,
+            'lock_start_date': self.lock_start_date.isoformat() if self.lock_start_date else None,
+            'lock_end_date': self.lock_end_date.isoformat() if self.lock_end_date else None,
+            'is_locked': self.is_locked,
+            'expected_return_rate': float(self.expected_return_rate) if self.expected_return_rate else 0,
+            'actual_return': float(self.actual_return) if self.actual_return else 0,
+            'status': self.status,
+            'withdrawal_requested_at': self.withdrawal_requested_at.isoformat() if self.withdrawal_requested_at else None,
+            'withdrawn_at': self.withdrawn_at.isoformat() if self.withdrawn_at else None,
+            'hedera_transaction_id': self.hedera_transaction_id,
+            'smart_contract_address': self.smart_contract_address,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+    
+    def can_withdraw(self):
+        """Check if investment can be withdrawn."""
+        if not self.is_locked:
+            return True
+        if self.status != 'active':
+            return False
+        return datetime.utcnow() >= self.lock_end_date
+    
+    def get_remaining_lock_time(self):
+        """Get remaining lock time in days."""
+        if not self.is_locked or self.lock_end_date is None:
+            return 0
+        remaining = self.lock_end_date - datetime.utcnow()
+        return max(0, remaining.days)
+
+
 class Transaction(db.Model):
     """Transaction model for on-ramp and off-ramp operations."""
     __tablename__ = 'transactions'

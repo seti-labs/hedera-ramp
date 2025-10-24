@@ -7,9 +7,18 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 from models import Transaction, User, db
 from middleware import token_required, kyc_required, validate_request_data, get_current_user, active_user_required
+from hedera_service import HederaService
 import requests
 import os
 import json
+
+# Initialize Hedera service for smart contract integration
+hedera_service = HederaService(
+    network=os.getenv('HEDERA_NETWORK', 'testnet'),
+    operator_id=os.getenv('HEDERA_OPERATOR_ID'),
+    operator_key=os.getenv('HEDERA_OPERATOR_KEY'),
+    contract_id=os.getenv('HEDERA_CONTRACT_ID')
+)
 
 intersend_bp = Blueprint('intersend', __name__, url_prefix='/api/intersend')
 
@@ -124,6 +133,31 @@ def initiate_intersend_onramp():
         db.session.add(transaction)
         db.session.flush()  # Get transaction ID
         
+        # NEW: Call smart contract to initiate on-ramp transaction
+        fiat_amount_wei = int(amount * 10**18)  # Convert KES to wei
+        contract_result = hedera_service.initiate_onramp_transaction(
+            current_user.wallet_address,
+            fiat_amount_wei,
+            phone_number
+        )
+        
+        if not contract_result['success']:
+            transaction.status = 'failed'
+            transaction.notes = f"Smart contract error: {contract_result['error']}"
+            db.session.commit()
+            
+            return jsonify({
+                'error': 'Smart contract error',
+                'message': contract_result['error']
+            }), 500
+        
+        # Update transaction with contract info
+        transaction.transaction_metadata = json.dumps({
+            **json.loads(transaction.transaction_metadata),
+            'contract_transaction_id': contract_result['transaction_id'],
+            'contract_status': 'initiated'
+        })
+        
         # Call Intersend API to initiate payment
         intersend_data = {
             'amount': amount,
@@ -217,6 +251,31 @@ def initiate_intersend_offramp():
         db.session.add(transaction)
         db.session.flush()  # Get transaction ID
         
+        # NEW: Call smart contract to initiate off-ramp transaction
+        hbar_amount_tinybars = int(float(crypto_amount) * 10**8)  # Convert HBAR to tinybars
+        contract_result = hedera_service.initiate_offramp_transaction(
+            current_user.wallet_address,
+            hbar_amount_tinybars,
+            phone_number
+        )
+        
+        if not contract_result['success']:
+            transaction.status = 'failed'
+            transaction.notes = f"Smart contract error: {contract_result['error']}"
+            db.session.commit()
+            
+            return jsonify({
+                'error': 'Smart contract error',
+                'message': contract_result['error']
+            }), 500
+        
+        # Update transaction with contract info
+        transaction.transaction_metadata = json.dumps({
+            **json.loads(transaction.transaction_metadata),
+            'contract_transaction_id': contract_result['transaction_id'],
+            'contract_status': 'initiated'
+        })
+        
         # Call Intersend API to initiate transfer
         intersend_data = {
             'amount': amount,
@@ -307,16 +366,49 @@ def intersend_callback():
             transaction.hedera_transaction_id = transaction_id
             transaction.notes = f"Intersend payment successful. Transaction ID: {transaction_id}"
             
-            # TODO: Trigger crypto transfer to user's wallet via Hedera (for on-ramp)
-            # TODO: Trigger crypto transfer from user's wallet via Hedera (for off-ramp)
+            # NEW: Update smart contract transaction status
+            contract_status = 2  # COMPLETED
+            contract_result = hedera_service.update_transaction_status(
+                transaction.id,
+                contract_status,
+                transaction_id,
+                f"Intersend payment completed. Transaction ID: {transaction_id}"
+            )
+            
+            if contract_result['success']:
+                # Update transaction metadata with contract update
+                metadata = json.loads(transaction.transaction_metadata or '{}')
+                metadata.update({
+                    'contract_status_updated': True,
+                    'contract_update_transaction_id': contract_result['transaction_id']
+                })
+                transaction.transaction_metadata = json.dumps(metadata)
             
         elif status == 'failed':
             transaction.status = 'failed'
             transaction.notes = f"Intersend payment failed. Transaction ID: {transaction_id}"
             
+            # NEW: Update smart contract transaction status
+            contract_status = 3  # FAILED
+            contract_result = hedera_service.update_transaction_status(
+                transaction.id,
+                contract_status,
+                transaction_id,
+                f"Intersend payment failed. Transaction ID: {transaction_id}"
+            )
+            
         elif status == 'cancelled':
             transaction.status = 'cancelled'
             transaction.notes = f"Intersend payment cancelled. Transaction ID: {transaction_id}"
+            
+            # NEW: Update smart contract transaction status
+            contract_status = 4  # CANCELLED
+            contract_result = hedera_service.update_transaction_status(
+                transaction.id,
+                contract_status,
+                transaction_id,
+                f"Intersend payment cancelled. Transaction ID: {transaction_id}"
+            )
         
         # Update metadata
         metadata = json.loads(transaction.transaction_metadata or '{}')

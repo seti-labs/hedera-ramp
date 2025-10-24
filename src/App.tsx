@@ -12,6 +12,7 @@ import Landing from "./pages/Landing";
 import Welcome from "./pages/Welcome";
 import Dashboard from "./pages/Dashboard";
 import MPesa from "./pages/MPesa";
+import StudentInvestments from "./pages/StudentInvestments";
 import Receipts from "./pages/Receipts";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -60,6 +61,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AppLayout><MPesa /></AppLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/investments" 
+              element={
+                <ProtectedRoute>
+                  <AppLayout><StudentInvestments /></AppLayout>
                 </ProtectedRoute>
               } 
             />
