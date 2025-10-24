@@ -156,16 +156,41 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         // Trigger the connection - this should open HashPack popup
         console.log('🔄 Calling hashconnect.connect() to open HashPack...');
         
-        // Add a small delay to ensure user interaction is registered
-        setTimeout(() => {
-          hashconnect.connect().then((connectionState) => {
+        // Try multiple connection methods
+        const tryConnect = async () => {
+          try {
+            const connectionState = await hashconnect.connect();
             console.log('HashConnect.connect() returned:', connectionState);
-          }).catch((connectError) => {
-            clearTimeout(timeout);
+          } catch (connectError) {
             console.error('❌ HashConnect.connect() failed:', connectError);
-            reject(new Error('Failed to open HashPack connection. Please:\n1. Make sure HashPack extension is installed\n2. Click the HashPack extension icon\n3. Check for popup blockers'));
-          });
-        }, 100);
+            
+            // Try alternative connection method
+            console.log('🔄 Trying alternative connection method...');
+            try {
+              // Force open HashPack extension
+              if (window.open) {
+                window.open('https://hashpack.app/', '_blank');
+              }
+              
+              // Try connect again after a delay
+              setTimeout(async () => {
+                try {
+                  const retryState = await hashconnect.connect();
+                  console.log('✅ Retry connection successful:', retryState);
+                } catch (retryError) {
+                  clearTimeout(timeout);
+                  reject(new Error('HashPack connection failed. Please:\n1. Make sure HashPack extension is installed and unlocked\n2. Click the HashPack extension icon manually\n3. Check for popup blockers\n4. Try refreshing the page'));
+                }
+              }, 2000);
+            } catch (altError) {
+              clearTimeout(timeout);
+              reject(new Error('HashPack connection failed. Please:\n1. Make sure HashPack extension is installed and unlocked\n2. Click the HashPack extension icon manually\n3. Check for popup blockers\n4. Try refreshing the page'));
+            }
+          }
+        };
+        
+        // Add a small delay to ensure user interaction is registered
+        setTimeout(tryConnect, 100);
       });
     } catch (error) {
       console.error('HashPack connection error:', error);

@@ -220,6 +220,18 @@ export const WalletConnect = ({ open, onOpenChange, onSuccess }: WalletConnectPr
               <p className="text-xs text-amber-600 dark:text-amber-500 text-center mt-2">
                 💡 If popup doesn't appear, click the HashPack extension icon in your browser
               </p>
+              
+              {/* Manual connection fallback */}
+              <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <p className="text-xs text-amber-800 dark:text-amber-200 font-medium mb-2">
+                  🔧 Still having issues? Try this:
+                </p>
+                <div className="space-y-2 text-xs text-amber-700 dark:text-amber-300">
+                  <p>1. Click the HashPack extension icon in your browser toolbar</p>
+                  <p>2. Make sure it's unlocked and on Testnet</p>
+                  <p>3. Come back and try connecting again</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
