@@ -1,16 +1,16 @@
 # Hedera Ramp Hub 🚀
 
-**M-Pesa to HBAR On/Off-Ramp Platform**
+**Mobile Money to HBAR On/Off-Ramp Platform**
 
 Built by **SetiLabs** • Powered by Hedera Hashgraph
 
 ## 🌟 Overview
 
-Hedera Ramp Hub is a seamless on-ramp and off-ramp solution that connects M-Pesa mobile money with Hedera's HBAR cryptocurrency, specifically designed for the Kenyan market.
+Hedera Ramp Hub is a seamless on-ramp and off-ramp solution that connects mobile money with Hedera's HBAR cryptocurrency, specifically designed for the Kenyan market.
 
 ## ✨ Features
 
-- ✅ **M-Pesa Integration** - Full on-ramp and off-ramp support
+- ✅ **Mobile Money Integration** - Full on-ramp and off-ramp support via Intersend
 - ✅ **Hedera Wallets** - HashPack & Blade wallet support
 - ✅ **Real-time Balance** - Live from Hedera Mirror Node
 - ✅ **Transaction Receipts** - View, download, and print
@@ -27,12 +27,12 @@ Hedera Ramp Hub is a seamless on-ramp and off-ramp solution that connects M-Pesa
 ### On-Ramp (Buy HBAR)
 - **Minimum:** 25 KES
 - **Maximum:** 150,000 KES
-- **Payment:** M-Pesa mobile money
+- **Payment:** Mobile money via Intersend
 
 ### Off-Ramp (Sell HBAR)
 - **Minimum:** 2 HBAR or 25 KES
 - **Maximum:** 150,000 KES
-- **Payment:** M-Pesa mobile money
+- **Payment:** Mobile money via Intersend
 
 ## 🛠️ Tech Stack
 

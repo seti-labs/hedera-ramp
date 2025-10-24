@@ -155,13 +155,17 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
         // Trigger the connection - this should open HashPack popup
         console.log('🔄 Calling hashconnect.connect() to open HashPack...');
-        hashconnect.connect().then((connectionState) => {
-          console.log('HashConnect.connect() returned:', connectionState);
-        }).catch((connectError) => {
-          clearTimeout(timeout);
-          console.error('❌ HashConnect.connect() failed:', connectError);
-          reject(new Error('Failed to open HashPack connection. Please:\n1. Make sure HashPack extension is installed\n2. Click the HashPack extension icon\n3. Check for popup blockers'));
-        });
+        
+        // Add a small delay to ensure user interaction is registered
+        setTimeout(() => {
+          hashconnect.connect().then((connectionState) => {
+            console.log('HashConnect.connect() returned:', connectionState);
+          }).catch((connectError) => {
+            clearTimeout(timeout);
+            console.error('❌ HashConnect.connect() failed:', connectError);
+            reject(new Error('Failed to open HashPack connection. Please:\n1. Make sure HashPack extension is installed\n2. Click the HashPack extension icon\n3. Check for popup blockers'));
+          });
+        }, 100);
       });
     } catch (error) {
       console.error('HashPack connection error:', error);

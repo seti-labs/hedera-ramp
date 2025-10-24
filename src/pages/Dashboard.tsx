@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useWallet } from '@/context/WalletContext';
-import { transactionAPI, mpesaAPI, Transaction } from '@/services/api';
+import { transactionAPI, intersendAPI, Transaction } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 import { 
   ArrowUpRight, 
@@ -40,12 +40,12 @@ export default function Dashboard() {
       const statsResponse = await transactionAPI.getStats();
       setStats(statsResponse);
       
-      // Load M-Pesa rates
+      // Load Intersend rates
       try {
-        const ratesResponse = await mpesaAPI.getRates();
+        const ratesResponse = await intersendAPI.getRates();
         setRates(ratesResponse);
       } catch (error) {
-        console.log('M-Pesa rates not available');
+        console.log('Intersend rates not available');
       }
     } catch (error: any) {
       console.error('Failed to load dashboard data:', error);

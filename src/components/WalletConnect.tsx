@@ -217,6 +217,9 @@ export const WalletConnect = ({ open, onOpenChange, onSuccess }: WalletConnectPr
                   : '⚠️ HashPack not detected - Install from hashpack.app'
                 }
               </p>
+              <p className="text-xs text-amber-600 dark:text-amber-500 text-center mt-2">
+                💡 If popup doesn't appear, click the HashPack extension icon in your browser
+              </p>
             </CardContent>
           </Card>
 
