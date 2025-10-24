@@ -21,6 +21,7 @@ from routes.kyc import kyc_bp
 from routes.crud import crud_bp
 from routes.transactions import transactions_bp
 from routes.mpesa import mpesa_bp
+from routes.intersend import intersend_bp
 from routes.public import public_bp
 
 
@@ -75,6 +76,7 @@ def create_app(config_name=None):
     app.register_blueprint(crud_bp)
     app.register_blueprint(transactions_bp)
     app.register_blueprint(mpesa_bp)
+    app.register_blueprint(intersend_bp)
     app.register_blueprint(public_bp)
     
     # Health check endpoint

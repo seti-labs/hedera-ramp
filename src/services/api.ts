@@ -426,6 +426,7 @@ export const getAuthToken = (): string | null => {
 
 // Export M-Pesa API
 export { mpesaAPI } from './mpesa';
+export { intersendAPI } from './intersend';
 
 export default api;
 

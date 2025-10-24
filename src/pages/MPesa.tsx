@@ -7,15 +7,16 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { mpesaAPI } from '@/services/api';
+import { intersendAPI } from '@/services/intersend';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, CheckCircle, XCircle, Phone, DollarSign } from 'lucide-react';
 
-interface MPesaRates {
+interface IntersendRates {
   KES_TO_HBAR: number;
   HBAR_TO_KES: number;
   last_updated: string;
   currency: string;
+  provider: string;
 }
 
 export default function MPesa() {
@@ -29,7 +30,7 @@ export default function MPesa() {
   const [offRampPhone, setOffRampPhone] = useState('254');
   const [cryptoAmount, setCryptoAmount] = useState('');
   const [loading, setLoading] = useState(false);
-  const [rates, setRates] = useState<MPesaRates | null>(null);
+  const [rates, setRates] = useState<IntersendRates | null>(null);
   const [transactionId, setTransactionId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function MPesa() {
 
   const loadRates = async () => {
     try {
-      const ratesData = await mpesaAPI.getRates();
+      const ratesData = await intersendAPI.getRates();
       setRates(ratesData);
     } catch (error) {
       console.error('Failed to load rates:', error);
@@ -101,7 +102,7 @@ export default function MPesa() {
       return;
     }
 
-    if (!mpesaAPI.validatePhoneNumber(onRampPhone)) {
+    if (!intersendAPI.validatePhoneNumber(onRampPhone)) {
       toast({
         title: 'Invalid Phone Number',
         description: 'Phone number must be in format 254XXXXXXXXX',
@@ -112,7 +113,7 @@ export default function MPesa() {
 
     setLoading(true);
     try {
-      const response = await mpesaAPI.initiateOnRamp({
+      const response = await intersendAPI.initiateOnRamp({
         amount,
         phone_number: onRampPhone,
         crypto_amount: calculateCrypto(onRampAmount),
@@ -122,7 +123,7 @@ export default function MPesa() {
 
       toast({
         title: 'Payment Initiated!',
-        description: 'Check your phone for the M-Pesa payment prompt',
+        description: 'Check your phone for the mobile money payment prompt',
       });
 
       // Poll for transaction status
@@ -169,7 +170,7 @@ export default function MPesa() {
       return;
     }
 
-    if (!mpesaAPI.validatePhoneNumber(offRampPhone)) {
+    if (!intersendAPI.validatePhoneNumber(offRampPhone)) {
       toast({
         title: 'Invalid Phone Number',
         description: 'Phone number must be in format 254XXXXXXXXX',
@@ -180,7 +181,7 @@ export default function MPesa() {
 
     setLoading(true);
     try {
-      const response = await mpesaAPI.initiateOffRamp({
+      const response = await intersendAPI.initiateOffRamp({
         amount,
         phone_number: offRampPhone,
         crypto_amount: cryptoAmount,
@@ -273,16 +274,16 @@ export default function MPesa() {
         <TabsContent value="onramp">
           <Card className="shadow-apple-lg border-0">
             <CardHeader>
-              <CardTitle className="text-2xl">Buy HBAR with M-Pesa</CardTitle>
+              <CardTitle className="text-2xl">Buy HBAR with Mobile Money</CardTitle>
               <CardDescription>
-                Pay with M-Pesa to purchase HBAR
+                Pay with mobile money to purchase HBAR
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <Alert>
                 <Phone className="h-4 w-4" />
                 <AlertDescription>
-                  You will receive a payment prompt on your phone. Enter your M-Pesa PIN to complete the transaction.
+                  You will receive a payment prompt on your phone. Enter your mobile money PIN to complete the transaction.
                 </AlertDescription>
               </Alert>
 
@@ -349,9 +350,9 @@ export default function MPesa() {
         <TabsContent value="offramp">
           <Card className="shadow-apple-lg border-0">
             <CardHeader>
-              <CardTitle className="text-2xl">Sell HBAR for M-Pesa</CardTitle>
+              <CardTitle className="text-2xl">Sell HBAR for Mobile Money</CardTitle>
               <CardDescription>
-                Convert HBAR to KES and receive via M-Pesa
+                Convert HBAR to KES and receive via mobile money
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
