@@ -424,8 +424,7 @@ export const getAuthToken = (): string | null => {
   return localStorage.getItem('access_token');
 };
 
-// Export M-Pesa API
-export { mpesaAPI } from './mpesa';
+// Export Intersend API
 export { intersendAPI } from './intersend';
 
 export default api;
