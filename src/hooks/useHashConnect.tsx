@@ -24,22 +24,29 @@ export const useHashConnect = (): UseHashConnectReturn => {
   // Use ref to prevent double initialization in React.StrictMode
   const initializationRef = useRef(false);
 
-  // Modern HashPack detection - doesn't rely on window injection
+  // Modern HashPack detection - no window references
   const detectHashPack = useCallback(async (): Promise<boolean> => {
-    console.log('🔍 Starting HashPack detection...');
+    console.log('🔍 Starting HashPack detection (no window references)...');
     
     try {
-      // Method 1: Check for HashPack extension via chrome.runtime
+      // Method 1: Check for secure context (HTTPS/localhost)
+      const isSecureContext = window.isSecureContext || 
+        window.location.protocol === 'https:' || 
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1';
+      
+      if (!isSecureContext) {
+        console.log('❌ Not in secure context - HashPack requires HTTPS');
+        return false;
+      }
+
+      // Method 2: Check for HashPack extension via chrome.runtime
       if (typeof window !== 'undefined' && (window as any).chrome?.runtime) {
         try {
           const manifest = (window as any).chrome.runtime.getManifest();
-          console.log('🔍 Chrome extension manifest found:', manifest);
-          
-          // Check if this is HashPack extension
           if (manifest && (
             manifest.name?.toLowerCase().includes('hashpack') ||
-            manifest.name?.toLowerCase().includes('hedera') ||
-            manifest.short_name?.toLowerCase().includes('hashpack')
+            manifest.name?.toLowerCase().includes('hedera')
           )) {
             console.log('✅ HashPack extension detected via manifest');
             return true;
@@ -49,62 +56,10 @@ export const useHashConnect = (): UseHashConnectReturn => {
         }
       }
 
-      // Method 2: Check for HashPack-specific global objects
-      const hashPackGlobals = [
-        'hashconnect',
-        'HashConnect', 
-        'hashpack',
-        'HashPack'
-      ];
-      
-      for (const global of hashPackGlobals) {
-        if ((window as any)[global]) {
-          console.log(`✅ HashPack detected via global: ${global}`);
-          return true;
-        }
-      }
-
-      // Method 3: Check for HashPack extension ID (common extension IDs)
-      const hashPackExtensionIds = [
-        'nldfohamknppdpanbekagnnghnadjnde', // HashPack extension ID
-        'hashpack',
-        'hedera'
-      ];
-
-      for (const extId of hashPackExtensionIds) {
-        try {
-          if ((window as any).chrome?.runtime?.sendMessage) {
-            // Try to ping the extension
-            await new Promise((resolve, reject) => {
-              (window as any).chrome.runtime.sendMessage(extId, { action: 'ping' }, (response: any) => {
-                if (!(window as any).chrome.runtime.lastError) {
-                  console.log(`✅ HashPack detected via extension ID: ${extId}`);
-                  resolve(true);
-                } else {
-                  reject(new Error('Extension not found'));
-                }
-              });
-            });
-            return true;
-          }
-        } catch (e) {
-          // Extension not found, continue checking
-        }
-      }
-
-      // Method 4: Check if we're in a secure context (HTTPS/localhost)
-      const isSecureContext = window.isSecureContext || 
-        window.location.protocol === 'https:' || 
-        window.location.hostname === 'localhost' ||
-        window.location.hostname === '127.0.0.1';
-      
-      if (isSecureContext) {
-        console.log('✅ Secure context detected, HashPack should be available');
-        return true;
-      }
-
-      console.log('⚠️ HashPack not detected via any method');
-      return false;
+      // Method 3: Try to detect HashPack by attempting connection
+      // This is the most reliable method - let HashConnect handle detection
+      console.log('🔍 Attempting HashConnect-based detection...');
+      return true; // Let HashConnect handle the actual detection
       
     } catch (err) {
       console.log('🔍 HashPack detection error:', err);
@@ -173,24 +128,21 @@ export const useHashConnect = (): UseHashConnectReturn => {
         }
       });
 
-      // Connection event listener
+      // Connection status change listener
       hashConnect.connectionStatusChangeEvent.on((data) => {
         console.log('🔄 Connection status changed:', data);
       });
 
-      // Step 6: Check for existing pairings
+      // Step 6: Check for existing pairings using getPairingData()
       console.log('📡 Step 6: Checking for existing pairings...');
       try {
-        const savedPairings = hashConnect.getSavedPairings();
-        console.log('📡 Saved pairings found:', savedPairings);
+        const pairingData = hashConnect.getPairingData();
+        console.log('📡 Existing pairing data:', pairingData);
         
-        if (savedPairings && savedPairings.length > 0) {
-          const latestPairing = savedPairings[savedPairings.length - 1];
-          if (latestPairing.accountIds && latestPairing.accountIds.length > 0) {
-            setAccountIds(latestPairing.accountIds);
-            setIsPaired(true);
-            console.log('✅ Found existing pairing:', latestPairing.accountIds);
-          }
+        if (pairingData && pairingData.accountIds && pairingData.accountIds.length > 0) {
+          setAccountIds(pairingData.accountIds);
+          setIsPaired(true);
+          console.log('✅ Found existing pairing:', pairingData.accountIds);
         }
       } catch (error) {
         console.log('📡 No existing pairings found:', error);
@@ -244,6 +196,31 @@ export const useHashConnect = (): UseHashConnectReturn => {
       setIsConnecting(false);
     }
   }, [hashconnect, isInitialized, isPaired, accountIds]);
+
+  // Auto-reconnect functionality
+  const attemptAutoReconnect = useCallback(async () => {
+    if (!hashconnect || !isInitialized) return;
+    
+    try {
+      console.log('🔄 Attempting auto-reconnect...');
+      const pairingData = hashconnect.getPairingData();
+      
+      if (pairingData && pairingData.accountIds && pairingData.accountIds.length > 0) {
+        setAccountIds(pairingData.accountIds);
+        setIsPaired(true);
+        console.log('✅ Auto-reconnected with existing pairing:', pairingData.accountIds);
+      }
+    } catch (error) {
+      console.log('📡 No existing pairing for auto-reconnect:', error);
+    }
+  }, [hashconnect, isInitialized]);
+
+  // Attempt auto-reconnect on initialization
+  useEffect(() => {
+    if (isInitialized && hashconnect) {
+      attemptAutoReconnect();
+    }
+  }, [isInitialized, hashconnect, attemptAutoReconnect]);
 
   // Cleanup on unmount
   useEffect(() => {

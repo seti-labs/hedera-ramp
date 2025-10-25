@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useWallet } from '@/context/WalletContext';
 import api from '@/services/api';
+import { mockPublicAPI } from '@/services/mockAPI';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { 
@@ -67,8 +68,14 @@ function LandingContent() {
 
   const loadStats = async () => {
     try {
-      const response = await api.get('/public/stats');
-      setStats(response.data);
+      if (process.env.NODE_ENV === 'development') {
+        // Use mock data in development
+        const response = await mockPublicAPI.getStats();
+        setStats(response);
+      } else {
+        const response = await api.get('/public/stats');
+        setStats(response.data);
+      }
     } catch (error) {
       console.error('Failed to load stats:', error);
       // Set fallback data to prevent breaking

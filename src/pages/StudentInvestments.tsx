@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
+import { mockStudentAPI } from '@/services/mockAPI';
 import { 
   GraduationCap, 
   TrendingUp, 
@@ -86,32 +87,42 @@ export default function StudentInvestments() {
     try {
       setLoading(true);
       
-      // Load student profile
-      const profileResponse = await fetch('/api/student-investments/profile', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        }
-      });
-      
-      if (profileResponse.ok) {
-        const profileData = await profileResponse.json();
+      // Use mock data in development
+      if (process.env.NODE_ENV === 'development') {
+        const profileData = await mockStudentAPI.getProfile();
         setStudentProfile(profileData.student);
         setInvestments(profileData.investments);
-      } else if (profileResponse.status === 404) {
-        // Student profile not found - show registration
-        setStudentProfile(null);
-      }
-      
-      // Load investment stats
-      const statsResponse = await fetch('/api/student-investments/stats', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        }
-      });
-      
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
+        
+        const statsData = await mockStudentAPI.getStats();
         setStats(statsData);
+      } else {
+        // Load student profile
+        const profileResponse = await fetch('/api/student-investments/profile', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+        
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          setStudentProfile(profileData.student);
+          setInvestments(profileData.investments);
+        } else if (profileResponse.status === 404) {
+          // Student profile not found - show registration
+          setStudentProfile(null);
+        }
+        
+        // Load investment stats
+        const statsResponse = await fetch('/api/student-investments/stats', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+        
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          setStats(statsData);
+        }
       }
       
     } catch (error) {
@@ -128,17 +139,8 @@ export default function StudentInvestments() {
 
   const handleStudentRegistration = async () => {
     try {
-      const response = await fetch('/api/student-investments/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        },
-        body: JSON.stringify(registrationData)
-      });
-
-      if (response.ok) {
-        const data = await response.json();
+      if (process.env.NODE_ENV === 'development') {
+        const data = await mockStudentAPI.register(registrationData);
         setStudentProfile(data.student);
         setShowRegisterDialog(false);
         toast({
@@ -146,12 +148,31 @@ export default function StudentInvestments() {
           description: 'Student profile created successfully! Verification pending.',
         });
       } else {
-        const error = await response.json();
-        toast({
-          title: 'Error',
-          description: error.error || 'Failed to create student profile',
-          variant: 'destructive',
+        const response = await fetch('/api/student-investments/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          },
+          body: JSON.stringify(registrationData)
         });
+
+        if (response.ok) {
+          const data = await response.json();
+          setStudentProfile(data.student);
+          setShowRegisterDialog(false);
+          toast({
+            title: 'Success',
+            description: 'Student profile created successfully! Verification pending.',
+          });
+        } else {
+          const error = await response.json();
+          toast({
+            title: 'Error',
+            description: error.error || 'Failed to create student profile',
+            variant: 'destructive',
+          });
+        }
       }
     } catch (error) {
       toast({

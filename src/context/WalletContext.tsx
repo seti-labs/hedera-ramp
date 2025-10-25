@@ -41,10 +41,10 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         const connected = await walletManager.autoConnect();
         if (connected) {
           console.log('✅ Auto-connect successful!');
-        } else {
+          } else {
           console.log('⚠️ Auto-connect failed - HashPack not detected');
         }
-      } catch (error) {
+    } catch (error) {
         console.warn('Auto-connect error:', error);
       }
     };

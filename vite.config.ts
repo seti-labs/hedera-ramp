@@ -1,13 +1,34 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import fs from "fs";
+
+// HTTPS certificate configuration for HashPack compatibility
+const getHttpsConfig = () => {
+  const certDir = path.resolve(__dirname, 'cert');
+  const keyPath = path.join(certDir, 'localhost.key');
+  const certPath = path.join(certDir, 'localhost.crt');
+  
+  // Check if custom certificates exist
+  if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+    console.log('🔒 Using custom SSL certificates for HTTPS');
+    return {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certPath)
+    };
+  }
+  
+  // Use Vite's built-in self-signed certificate
+  console.log('🔒 Using Vite self-signed certificate for HTTPS');
+  return true;
+};
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "localhost",
     port: 5173,
-    https: true, // Enable HTTPS for HashPack compatibility
+    https: getHttpsConfig(), // Enable HTTPS with certificate handling
   },
   plugins: [react()],
   resolve: {

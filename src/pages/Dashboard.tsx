@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useWallet } from '@/context/WalletContext';
 import { transactionAPI, intersendAPI, Transaction } from '@/services/api';
+import { mockTransactionAPI, mockIntersendAPI } from '@/services/mockAPI';
 import { toast } from '@/hooks/use-toast';
 import { 
   ArrowUpRight, 
@@ -32,20 +33,32 @@ export default function Dashboard() {
     try {
       setLoading(true);
       
-      // Load recent transactions
-      const txResponse = await transactionAPI.getAll({ limit: 5 });
-      setTransactions(txResponse.transactions);
-      
-      // Load transaction stats
-      const statsResponse = await transactionAPI.getStats();
-      setStats(statsResponse);
-      
-      // Load Intersend rates
-      try {
-        const ratesResponse = await intersendAPI.getRates();
+      if (process.env.NODE_ENV === 'development') {
+        // Use mock data in development
+        const txResponse = await mockTransactionAPI.getAll({ limit: 5 });
+        setTransactions(txResponse.transactions);
+        
+        const statsResponse = await mockTransactionAPI.getStats();
+        setStats(statsResponse);
+        
+        const ratesResponse = await mockIntersendAPI.getRates();
         setRates(ratesResponse);
-      } catch (error) {
-        console.log('Intersend rates not available');
+      } else {
+        // Load recent transactions
+        const txResponse = await transactionAPI.getAll({ limit: 5 });
+        setTransactions(txResponse.transactions);
+        
+        // Load transaction stats
+        const statsResponse = await transactionAPI.getStats();
+        setStats(statsResponse);
+        
+        // Load Intersend rates
+        try {
+          const ratesResponse = await intersendAPI.getRates();
+          setRates(ratesResponse);
+        } catch (error) {
+          console.log('Intersend rates not available');
+        }
       }
     } catch (error: any) {
       console.error('Failed to load dashboard data:', error);

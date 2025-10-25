@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WalletProvider } from "@/context/WalletContext";
+import { MockWalletProvider } from "@/context/MockWalletContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
@@ -46,7 +47,11 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <WalletProvider>
+        {process.env.NODE_ENV === 'development' ? (
+          <MockWalletProvider>
+        ) : (
+          <WalletProvider>
+        )}
           <Routes>
             {/* Public pages */}
             <Route path="/" element={<Landing />} />
@@ -114,7 +119,11 @@ const App = () => (
             
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </WalletProvider>
+        {process.env.NODE_ENV === 'development' ? (
+          </MockWalletProvider>
+        ) : (
+          </WalletProvider>
+        )}
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
