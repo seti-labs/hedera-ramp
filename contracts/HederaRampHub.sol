@@ -258,9 +258,8 @@ contract HederaRampHub is ReentrancyGuard, Ownable, Pausable {
         uint256 hbarAmount = (fiatAmount * currentRate.kesToHbar) / 10**18;
         require(hbarAmount > 0, "Invalid HBAR amount");
         
-        // Check if user has sufficient balance for fees
+        // Calculate fee amount (for tracking purposes)
         uint256 feeAmount = (fiatAmount * onRampFeeBps) / 10000;
-        require(msg.value >= feeAmount, "Insufficient fee payment");
         
         // Create transaction
         transactionCounter++;
@@ -353,7 +352,7 @@ contract HederaRampHub is ReentrancyGuard, Ownable, Pausable {
         totalOffRampVolume += fiatAmount;
         totalFeesCollected += feeAmount;
         
-        // Transfer HBAR to escrow
+        // Transfer HBAR to escrow (this would be handled by the backend)
         escrowBalance += hbarAmount;
         
         emit TransactionCreated(

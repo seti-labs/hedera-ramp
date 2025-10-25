@@ -6,6 +6,7 @@ import { useWallet } from '@/context/WalletContext';
 import { authAPI, setAuthToken, setRefreshToken } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { walletManager } from '@/services/walletManager';
 
 interface WalletConnectProps {
   open: boolean;
@@ -19,50 +20,21 @@ export const WalletConnect = ({ open, onOpenChange, onSuccess }: WalletConnectPr
   const [registering, setRegistering] = useState(false);
   const [hashPackDetected, setHashPackDetected] = useState(false);
 
-  // Check for HashPack on mount
+  // Check for HashPack availability
   useEffect(() => {
-    const checkHashPack = () => {
-      // HashPack detection - check for the extension
-      const isHashPackInstalled = !!(
-        // Check for HashPack extension
-        window.hashconnect ||
-        (window as any).hashconnect ||
-        // Check for HashPack global objects
-        (window as any).HashConnect ||
-        // Check for HashPack in extensions
-        (window as any).hashpack ||
-        // Check if we can access HashPack APIs
-        (typeof window !== 'undefined' && 'hashconnect' in window)
-      );
+    const checkHashPack = async () => {
+      const isAvailable = await walletManager.checkHashPackAvailability();
+      setHashPackDetected(isAvailable);
       
-      console.log('HashPack detection check:', {
-        windowHashconnect: !!window.hashconnect,
-        windowHashConnect: !!(window as any).HashConnect,
-        windowHashpack: !!(window as any).hashpack,
-        hasHashconnect: 'hashconnect' in window
-      });
-      
-      if (isHashPackInstalled) {
-        setHashPackDetected(true);
-        console.log('✅ HashPack detected!');
-      } else {
-        setHashPackDetected(false);
-        console.log('❌ HashPack not detected');
+      // Auto-connect if dialog is open and HashPack is detected
+      if (open && isAvailable && !isConnecting && !registering) {
+        console.log('🔄 Auto-connecting to HashPack...');
+        handleWalletConnect();
       }
     };
 
     checkHashPack();
-    
-    // Check multiple times with increasing delays
-    const timeouts = [
-      setTimeout(checkHashPack, 100),
-      setTimeout(checkHashPack, 500),
-      setTimeout(checkHashPack, 1000),
-      setTimeout(checkHashPack, 2000)
-    ];
-    
-    return () => timeouts.forEach(clearTimeout);
-  }, []);
+  }, [open, isConnecting, registering]);
 
   // Manual override for HashPack detection
   const forceHashPackDetection = () => {
@@ -214,7 +186,7 @@ export const WalletConnect = ({ open, onOpenChange, onSuccess }: WalletConnectPr
               <p className="text-xs text-muted-foreground text-center mt-3">
                 {hashPackDetected 
                   ? '✅ HashPack detected - Click to connect'
-                  : '⚠️ HashPack not detected - Install from hashpack.app'
+                  : '⚠️ HashPack not detected - Install from hashpack.app or try connecting anyway'
                 }
               </p>
               <p className="text-xs text-amber-600 dark:text-amber-500 text-center mt-2">

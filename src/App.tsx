@@ -17,6 +17,11 @@ import Receipts from "./pages/Receipts";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
+// Import wallet test in development
+if (process.env.NODE_ENV === 'development') {
+  import('./utils/walletTest');
+}
+
 const queryClient = new QueryClient();
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
