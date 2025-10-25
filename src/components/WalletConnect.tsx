@@ -6,7 +6,7 @@ import { useWallet } from '@/context/WalletContext';
 import { authAPI, setAuthToken, setRefreshToken } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { walletManager } from '@/services/walletManager';
+import { useHashConnect } from '@/hooks/useHashConnect';
 
 interface WalletConnectProps {
   open: boolean;
@@ -16,51 +16,54 @@ interface WalletConnectProps {
 
 export const WalletConnect = ({ open, onOpenChange, onSuccess }: WalletConnectProps) => {
   const { connectWallet, wallet } = useWallet();
-  const [isConnecting, setIsConnecting] = useState(false);
+  const { 
+    connectWallet: hashConnectWallet, 
+    isPaired, 
+    accountIds, 
+    isConnecting: hashConnecting, 
+    error: hashError,
+    isHashPackAvailable,
+    isInitialized
+  } = useHashConnect();
   const [registering, setRegistering] = useState(false);
-  const [hashPackDetected, setHashPackDetected] = useState(false);
 
-  // Check for HashPack availability
+  // Auto-connect if dialog is open and HashPack is detected
   useEffect(() => {
-    const checkHashPack = async () => {
-      const isAvailable = await walletManager.checkHashPackAvailability();
-      setHashPackDetected(isAvailable);
-      
-      // Auto-connect if dialog is open and HashPack is detected
-      if (open && isAvailable && !isConnecting && !registering) {
-        console.log('🔄 Auto-connecting to HashPack...');
+    if (open && isHashPackAvailable && isInitialized && !hashConnecting && !registering) {
+      console.log('🔄 Auto-connecting to HashPack...');
+      // Add a small delay to ensure dialog is fully open
+      setTimeout(() => {
         handleWalletConnect();
-      }
-    };
-
-    checkHashPack();
-  }, [open, isConnecting, registering]);
+      }, 500);
+    }
+  }, [open, isHashPackAvailable, isInitialized, hashConnecting, registering]);
 
   // Manual override for HashPack detection
   const forceHashPackDetection = () => {
-    setHashPackDetected(true);
     console.log('🔧 Manual HashPack detection override activated');
   };
 
   const handleWalletConnect = async () => {
-    setIsConnecting(true);
     try {
       console.log('Starting wallet connection...');
       
-      // Connect to HashPack wallet
-      await connectWallet('hashpack');
+      // Use the new HashConnect hook
+      await hashConnectWallet();
       
-      console.log('Wallet connected, wallet state:', wallet);
-      
-      // After wallet connects, automatically sign up/sign in
-      // Wait a bit for wallet state to update
-      setTimeout(async () => {
-        const currentWallet = JSON.parse(localStorage.getItem('walletState') || '{}');
-        if (currentWallet.accountId) {
-          console.log('Authenticating with accountId:', currentWallet.accountId);
-          await handleWalletAuth(currentWallet.accountId, 'hashpack');
-        }
-      }, 500);
+      // Wait for pairing to complete
+      if (isPaired && accountIds.length > 0) {
+        console.log('Wallet paired successfully with accounts:', accountIds);
+        
+        // Update wallet context with the connected account
+        const accountId = accountIds[0];
+        await connectWallet('hashpack');
+        
+        // After wallet connects, automatically sign up/sign in
+        setTimeout(async () => {
+          console.log('Authenticating with accountId:', accountId);
+          await handleWalletAuth(accountId, 'hashpack');
+        }, 500);
+      }
       
     } catch (error: any) {
       console.error('Wallet connection failed:', error);
@@ -88,8 +91,6 @@ export const WalletConnect = ({ open, onOpenChange, onSuccess }: WalletConnectPr
         variant: 'destructive',
         duration: 12000, // Show for 12 seconds
       });
-    } finally {
-      setIsConnecting(false);
     }
   };
 
@@ -167,11 +168,16 @@ export const WalletConnect = ({ open, onOpenChange, onSuccess }: WalletConnectPr
             <CardContent className="p-6">
               <Button
                 onClick={handleWalletConnect}
-                disabled={isConnecting || registering}
+                disabled={!isInitialized || hashConnecting || registering}
                 className="w-full bg-foreground text-background hover:bg-foreground/90 font-semibold rounded-xl py-6"
                 size="lg"
               >
-                {(isConnecting || registering) ? (
+                {!isInitialized ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Initializing...
+                  </>
+                ) : (hashConnecting || registering) ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     {registering ? 'Registering...' : 'Connecting...'}
@@ -184,7 +190,7 @@ export const WalletConnect = ({ open, onOpenChange, onSuccess }: WalletConnectPr
                 )}
               </Button>
               <p className="text-xs text-muted-foreground text-center mt-3">
-                {hashPackDetected 
+                {isHashPackAvailable 
                   ? '✅ HashPack detected - Click to connect'
                   : '⚠️ HashPack not detected - Install from hashpack.app or try connecting anyway'
                 }
@@ -223,7 +229,7 @@ export const WalletConnect = ({ open, onOpenChange, onSuccess }: WalletConnectPr
           <div className="bg-muted/50 rounded-xl p-4 text-sm text-center">
             <p className="font-semibold mb-2">New to Hedera?</p>
             <p className="text-muted-foreground text-xs">
-              {hashPackDetected 
+              {isHashPackAvailable 
                 ? 'Your HashPack wallet is ready! Connect it to get started.'
                 : 'Install HashPack wallet extension, create a new wallet, and connect it here.'
               }

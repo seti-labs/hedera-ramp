@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "localhost",
     port: 5173,
+    https: true, // Enable HTTPS for HashPack compatibility
   },
   plugins: [react()],
   resolve: {

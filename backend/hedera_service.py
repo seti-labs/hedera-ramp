@@ -576,6 +576,235 @@ class HederaService:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+    # ============ SIMPLE CONTRACT FUNCTIONS ============
+    
+    def register_user_simple(self, user_address: str, phone_number: str) -> Dict[str, Any]:
+        """Register user on simple smart contract"""
+        try:
+            if not self.contract_id_obj:
+                return {"success": False, "error": "Contract ID not configured"}
+            
+            tx = ContractExecuteTransaction() \
+                .setContractId(self.contract_id_obj) \
+                .setGas(100000) \
+                .setFunction(
+                    "registerUser",
+                    ContractFunctionParameters()
+                        .addString(phone_number)
+                )
+            
+            response = tx.execute(self.client)
+            receipt = response.getReceipt(self.client)
+            
+            return {
+                "success": True, 
+                "transaction_id": str(response.transactionId)
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def verify_kyc_simple(self, user_address: str) -> Dict[str, Any]:
+        """Verify user KYC on simple smart contract"""
+        try:
+            if not self.contract_id_obj:
+                return {"success": False, "error": "Contract ID not configured"}
+            
+            user_account = AccountId.fromString(user_address)
+            
+            tx = ContractExecuteTransaction() \
+                .setContractId(self.contract_id_obj) \
+                .setGas(100000) \
+                .setFunction(
+                    "verifyKyc",
+                    ContractFunctionParameters()
+                        .addAddress(user_account)
+                )
+            
+            response = tx.execute(self.client)
+            receipt = response.getReceipt(self.client)
+            
+            return {
+                "success": True, 
+                "transaction_id": str(response.transactionId)
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def create_transaction_simple(self, user_address: str, is_on_ramp: bool, amount: int, currency: str) -> Dict[str, Any]:
+        """Create transaction on simple smart contract"""
+        try:
+            if not self.contract_id_obj:
+                return {"success": False, "error": "Contract ID not configured"}
+            
+            tx = ContractExecuteTransaction() \
+                .setContractId(self.contract_id_obj) \
+                .setGas(100000) \
+                .setFunction(
+                    "createTransaction",
+                    ContractFunctionParameters()
+                        .addBool(is_on_ramp)
+                        .addUint256(amount)
+                        .addString(currency)
+                )
+            
+            response = tx.execute(self.client)
+            receipt = response.getReceipt(self.client)
+            
+            return {
+                "success": True, 
+                "transaction_id": str(response.transactionId)
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def complete_transaction_simple(self, transaction_id: int) -> Dict[str, Any]:
+        """Complete transaction on simple smart contract"""
+        try:
+            if not self.contract_id_obj:
+                return {"success": False, "error": "Contract ID not configured"}
+            
+            tx = ContractExecuteTransaction() \
+                .setContractId(self.contract_id_obj) \
+                .setGas(100000) \
+                .setFunction(
+                    "completeTransaction",
+                    ContractFunctionParameters()
+                        .addUint256(transaction_id)
+                )
+            
+            response = tx.execute(self.client)
+            receipt = response.getReceipt(self.client)
+            
+            return {
+                "success": True, 
+                "transaction_id": str(response.transactionId)
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def update_rates_simple(self, kes_to_hbar: int, hbar_to_kes: int) -> Dict[str, Any]:
+        """Update exchange rates on simple smart contract"""
+        try:
+            if not self.contract_id_obj:
+                return {"success": False, "error": "Contract ID not configured"}
+            
+            tx = ContractExecuteTransaction() \
+                .setContractId(self.contract_id_obj) \
+                .setGas(100000) \
+                .setFunction(
+                    "updateExchangeRates",
+                    ContractFunctionParameters()
+                        .addUint256(kes_to_hbar)
+                        .addUint256(hbar_to_kes)
+                )
+            
+            response = tx.execute(self.client)
+            receipt = response.getReceipt(self.client)
+            
+            return {
+                "success": True, 
+                "transaction_id": str(response.transactionId)
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def get_rates_simple(self) -> Dict[str, Any]:
+        """Get exchange rates from simple smart contract"""
+        try:
+            if not self.contract_id_obj:
+                return {"success": False, "error": "Contract ID not configured"}
+            
+            query = ContractCallQuery() \
+                .setContractId(self.contract_id_obj) \
+                .setGas(100000) \
+                .setFunction("getExchangeRates")
+            
+            response = query.execute(self.client)
+            
+            return {
+                "success": True, 
+                "data": response
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def calculate_hbar_simple(self, kes_amount: int) -> Dict[str, Any]:
+        """Calculate HBAR amount for KES on simple contract"""
+        try:
+            if not self.contract_id_obj:
+                return {"success": False, "error": "Contract ID not configured"}
+            
+            query = ContractCallQuery() \
+                .setContractId(self.contract_id_obj) \
+                .setGas(100000) \
+                .setFunction(
+                    "calculateHbarAmount",
+                    ContractFunctionParameters()
+                        .addUint256(kes_amount)
+                )
+            
+            response = query.execute(self.client)
+            
+            return {
+                "success": True, 
+                "data": response
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def calculate_kes_simple(self, hbar_amount: int) -> Dict[str, Any]:
+        """Calculate KES amount for HBAR on simple contract"""
+        try:
+            if not self.contract_id_obj:
+                return {"success": False, "error": "Contract ID not configured"}
+            
+            query = ContractCallQuery() \
+                .setContractId(self.contract_id_obj) \
+                .setGas(100000) \
+                .setFunction(
+                    "calculateKesAmount",
+                    ContractFunctionParameters()
+                        .addUint256(hbar_amount)
+                )
+            
+            response = query.execute(self.client)
+            
+            return {
+                "success": True, 
+                "data": response
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def get_stats_simple(self) -> Dict[str, Any]:
+        """Get platform statistics from simple smart contract"""
+        try:
+            if not self.contract_id_obj:
+                return {"success": False, "error": "Contract ID not configured"}
+            
+            query = ContractCallQuery() \
+                .setContractId(self.contract_id_obj) \
+                .setGas(100000) \
+                .setFunction("getPlatformStats")
+            
+            response = query.execute(self.client)
+            
+            return {
+                "success": True, 
+                "data": response
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
     def close(self):
         """Close the Hedera client connection."""
         if self.client:

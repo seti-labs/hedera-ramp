@@ -26,8 +26,8 @@ from routes.public import public_bp
 # Optional imports that require Java/Hedera SDK
 try:
     from routes.intersend import intersend_bp
-    from routes.hedera import hedera_bp
     from routes.student_investments import student_investments_bp
+    from routes.ramp import ramp_bp
     HEDERA_AVAILABLE = True
     print("✅ Hedera services available")
 except Exception as e:
@@ -92,8 +92,8 @@ def create_app(config_name=None):
     if HEDERA_AVAILABLE:
         try:
             app.register_blueprint(intersend_bp)
-            app.register_blueprint(hedera_bp)
             app.register_blueprint(student_investments_bp)
+            app.register_blueprint(ramp_bp)
             print("✅ Hedera blueprints registered")
         except Exception as e:
             print(f"⚠️ Failed to register Hedera blueprints: {e}")

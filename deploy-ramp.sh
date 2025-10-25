@@ -1,10 +1,9 @@
 #!/bin/bash
 
-# Hedera Ramp Hub Smart Contract Deployment Script
-# This script will deploy the smart contract and get the contract ID
+# Simple RampHub Contract Deployment Script
 
-echo "🚀 Starting Hedera Ramp Hub Smart Contract Deployment"
-echo "=================================================="
+echo "🚀 Starting RampHub Contract Deployment"
+echo "======================================"
 
 # Check if required environment variables are set
 if [ -z "$HEDERA_OPERATOR_ID" ] || [ "$HEDERA_OPERATOR_ID" = "0.0.YOUR_ACCOUNT_ID" ]; then
@@ -29,7 +28,7 @@ fi
 echo "📋 Configuration:"
 echo "   Network: $HEDERA_NETWORK"
 echo "   Operator ID: $HEDERA_OPERATOR_ID"
-echo "   Contract: HederaRampHub.sol"
+echo "   Contract: RampHub.sol"
 echo ""
 
 # Check if Node.js is installed
@@ -52,12 +51,9 @@ if [ ! -d "node_modules" ]; then
     npm install @hashgraph/sdk
 fi
 
-# Create deployments directory
-mkdir -p deployments
-
 # Run the deployment script
-echo "🚀 Deploying smart contract..."
-node scripts/deploy-contract.js
+echo "🚀 Deploying RampHub contract..."
+node scripts/deploy-ramp.js
 
 # Check if deployment was successful
 if [ $? -eq 0 ]; then
@@ -69,9 +65,9 @@ if [ $? -eq 0 ]; then
     echo "2. Add it to your backend .env file:"
     echo "   HEDERA_CONTRACT_ID=0.0.CONTRACT_ID"
     echo "3. Start your backend: cd backend && python app.py"
-    echo "4. Test the integration: python test_hedera_integration.py"
+    echo "4. Test the contract: curl http://localhost:5000/api/ramp/health"
     echo ""
-    echo "🎉 Your smart contract is ready to use!"
+    echo "🎉 Your simple smart contract is ready to use!"
 else
     echo "❌ Deployment failed. Please check the error messages above."
     exit 1

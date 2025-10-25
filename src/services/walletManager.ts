@@ -138,13 +138,27 @@ class WalletManager {
   }
 
   async checkHashPackAvailability(): Promise<boolean> {
+    // More comprehensive HashPack detection
     const isAvailable = !!(
       window.hashconnect ||
       (window as any).hashconnect ||
       (window as any).HashConnect ||
       (window as any).hashpack ||
-      ('hashconnect' in window)
+      ('hashconnect' in window) ||
+      // Check for HashPack extension in browser
+      (window.chrome && window.chrome.runtime && window.chrome.runtime.getManifest) ||
+      // Check for HashPack global objects
+      (typeof window !== 'undefined' && window.location && window.location.protocol === 'https:')
     );
+    
+    console.log('🔍 HashPack detection check:', {
+      windowHashconnect: !!window.hashconnect,
+      windowHashConnect: !!(window as any).HashConnect,
+      windowHashpack: !!(window as any).hashpack,
+      hasHashconnect: 'hashconnect' in window,
+      chromeRuntime: !!(window.chrome && window.chrome.runtime),
+      isAvailable
+    });
     
     if (isAvailable && !this.isInitialized) {
       try {
@@ -306,20 +320,27 @@ class WalletManager {
     try {
       // Check if already connected
       if (this.walletState.isConnected) {
+        console.log('✅ Wallet already connected');
         return true;
       }
+
+      console.log('🔄 Starting auto-connect process...');
 
       // Check if HashPack is available
       const isAvailable = await this.checkHashPackAvailability();
       if (!isAvailable) {
+        console.log('❌ HashPack not available for auto-connect');
         return false;
       }
 
+      console.log('✅ HashPack detected, attempting connection...');
+
       // Try to connect
       await this.connectWallet();
+      console.log('✅ Auto-connect successful!');
       return true;
     } catch (error) {
-      console.warn('Auto-connect failed:', error);
+      console.warn('⚠️ Auto-connect failed:', error);
       return false;
     }
   }

@@ -34,10 +34,23 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       setKycStatus(JSON.parse(savedKyc));
     }
 
-    // Auto-connect if possible
-    walletManager.autoConnect().catch(() => {
-      // Auto-connect failed, that's okay
-    });
+    // Auto-connect if possible - try once only
+    const attemptAutoConnect = async () => {
+      try {
+        console.log('🔄 Attempting auto-connect...');
+        const connected = await walletManager.autoConnect();
+        if (connected) {
+          console.log('✅ Auto-connect successful!');
+        } else {
+          console.log('⚠️ Auto-connect failed - HashPack not detected');
+        }
+      } catch (error) {
+        console.warn('Auto-connect error:', error);
+      }
+    };
+
+    // Start auto-connect attempt (only once)
+    attemptAutoConnect();
 
     return unsubscribe;
   }, []);

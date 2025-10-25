@@ -19,7 +19,14 @@ import {
   Smartphone,
   Shield,
   Zap,
-  BarChart3
+  BarChart3,
+  GraduationCap,
+  Lock,
+  Unlock,
+  BookOpen,
+  Building,
+  DollarSign,
+  Calendar
 } from 'lucide-react';
 
 interface PublicStats {
@@ -94,8 +101,8 @@ function LandingContent() {
             <div className="flex items-center gap-3">
               <img src="/hedera-logo.svg" alt="Hedera" className="h-12 w-12" />
               <div>
-                <h2 className="text-2xl font-bold">Hedera Ramp Hub</h2>
-                <p className="text-sm text-muted-foreground">Powered by Hedera Hashgraph</p>
+                <h2 className="text-2xl font-bold">Campus Investment Hub</h2>
+                <p className="text-sm text-muted-foreground">Student Investment Platform • Powered by Hedera</p>
               </div>
             </div>
             <Button 
@@ -109,15 +116,16 @@ function LandingContent() {
           {/* Hero Content */}
           <div className="max-w-4xl mx-auto text-center mb-20">
             <Badge className="mb-6 bg-foreground text-background">
-              🇰🇪 Kenya's #1 M-Pesa to HBAR Platform
+              🎓 Campus Student Investment Platform
             </Badge>
             
             <h1 className="text-6xl md:text-7xl font-bold mb-6">
-              M-Pesa ↔ HBAR
+              Invest & Lock
             </h1>
             
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              The fastest and easiest way to convert between Kenyan Shillings and HBAR cryptocurrency using M-Pesa mobile money
+              Build financial discipline by investing with funds locked until graduation. 
+              Learn investing while your money grows safely.
             </p>
 
             <Button
@@ -140,7 +148,7 @@ function LandingContent() {
                 <div className="text-4xl font-bold mb-2">
                   {loading ? '...' : stats?.total_users || 0}
                 </div>
-                <div className="text-sm text-muted-foreground font-semibold">Active Users</div>
+                <div className="text-sm text-muted-foreground font-semibold">Student Investors</div>
               </CardContent>
             </Card>
 
@@ -152,7 +160,7 @@ function LandingContent() {
                 <div className="text-4xl font-bold mb-2">
                   {loading ? '...' : stats?.total_transactions || 0}
                 </div>
-                <div className="text-sm text-muted-foreground font-semibold">Total Transactions</div>
+                <div className="text-sm text-muted-foreground font-semibold">Active Investments</div>
               </CardContent>
             </Card>
 
@@ -164,7 +172,7 @@ function LandingContent() {
                 <div className="text-4xl font-bold mb-2">
                   {loading ? '...' : stats?.unique_wallets || 0}
                 </div>
-                <div className="text-sm text-muted-foreground font-semibold">Wallet Addresses</div>
+                <div className="text-sm text-muted-foreground font-semibold">Universities</div>
               </CardContent>
             </Card>
 
@@ -176,7 +184,7 @@ function LandingContent() {
                 <div className="text-4xl font-bold mb-2">
                   {loading ? '...' : stats ? `${(stats.total_volume_kes / 1000).toFixed(0)}K` : '0'}
                 </div>
-                <div className="text-sm text-muted-foreground font-semibold">Volume (KES)</div>
+                <div className="text-sm text-muted-foreground font-semibold">Total Locked (KES)</div>
               </CardContent>
             </Card>
           </div>
@@ -186,17 +194,18 @@ function LandingContent() {
       {/* Features Section */}
       <section className="bg-muted/30 py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-16">How It Works</h2>
+          <h2 className="text-4xl font-bold text-center mb-16">How Student Investment Works</h2>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <Card className="shadow-apple border-0">
               <CardContent className="pt-8 text-center">
                 <div className="p-5 bg-foreground rounded-3xl inline-block mb-6">
-                  <Wallet className="h-12 w-12 text-background" />
+                  <GraduationCap className="h-12 w-12 text-background" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3">1. Connect Wallet</h3>
+                <h3 className="text-2xl font-bold mb-3">1. Register as Student</h3>
                 <p className="text-muted-foreground">
-                  Connect your Hedera wallet (HashPack or Blade). Your wallet is your identity - no complex KYC needed.
+                  Register with your university details and graduation year. 
+                  Your student status is verified for secure investing.
                 </p>
               </CardContent>
             </Card>
@@ -204,11 +213,12 @@ function LandingContent() {
             <Card className="shadow-apple border-0">
               <CardContent className="pt-8 text-center">
                 <div className="p-5 bg-foreground rounded-3xl inline-block mb-6">
-                  <Smartphone className="h-12 w-12 text-background" />
+                  <Lock className="h-12 w-12 text-background" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3">2. Use M-Pesa</h3>
+                <h3 className="text-2xl font-bold mb-3">2. Invest & Lock</h3>
                 <p className="text-muted-foreground">
-                  Buy HBAR with M-Pesa or sell HBAR for KES. Simple, fast, and secure mobile money transactions.
+                  Choose your investment type and lock period. Your money is locked 
+                  until graduation or the specified time period.
                 </p>
               </CardContent>
             </Card>
@@ -216,11 +226,12 @@ function LandingContent() {
             <Card className="shadow-apple border-0">
               <CardContent className="pt-8 text-center">
                 <div className="p-5 bg-foreground rounded-3xl inline-block mb-6">
-                  <CheckCircle className="h-12 w-12 text-background" />
+                  <Unlock className="h-12 w-12 text-background" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3">3. Done!</h3>
+                <h3 className="text-2xl font-bold mb-3">3. Graduate & Withdraw</h3>
                 <p className="text-muted-foreground">
-                  Receive HBAR in your wallet or KES in your M-Pesa instantly. Download receipts anytime.
+                  When you graduate or the lock period ends, withdraw your 
+                  investment plus returns. Build financial discipline!
                 </p>
               </CardContent>
             </Card>
@@ -228,82 +239,84 @@ function LandingContent() {
         </div>
       </section>
 
-      {/* Transaction Types */}
+      {/* Investment Types */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* On-Ramp */}
+            {/* Savings Investment */}
             <Card className="shadow-apple-lg border-0 overflow-hidden group hover:shadow-glow transition-all">
               <CardContent className="pt-8">
                 <div className="flex items-start justify-between mb-6">
                   <div className="p-4 bg-foreground rounded-2xl">
-                    <ArrowUpRight className="h-10 w-10 text-background" />
+                    <DollarSign className="h-10 w-10 text-background" />
                   </div>
                   <Badge className="bg-muted font-semibold px-3 py-1">
-                    {loading ? '...' : stats?.onramp_count || 0} Completed
+                    Safe & Secure
                   </Badge>
                 </div>
-                <h3 className="text-3xl font-bold mb-4">On-Ramp</h3>
+                <h3 className="text-3xl font-bold mb-4">Savings Investment</h3>
                 <p className="text-muted-foreground mb-6">
-                  Pay with M-Pesa and receive HBAR in your wallet instantly. Min: 25 KES, Max: 150,000 KES.
+                  Traditional savings account with guaranteed returns. 
+                  Your money is locked until graduation with 5% annual returns.
                 </p>
                 <ul className="space-y-2 mb-6">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5" />
-                    <span className="text-sm">Instant M-Pesa payment</span>
+                    <span className="text-sm">5% annual return rate</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5" />
-                    <span className="text-sm">HBAR delivered to wallet</span>
+                    <span className="text-sm">Locked until graduation</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5" />
-                    <span className="text-sm">Real-time exchange rates</span>
+                    <span className="text-sm">Guaranteed returns</span>
                   </li>
                 </ul>
                 <Button 
-                  onClick={() => navigate(wallet.isConnected ? '/mpesa?tab=onramp' : '/welcome')} 
+                  onClick={() => navigate(wallet.isConnected ? '/investments' : '/welcome')} 
                   className="w-full bg-foreground text-background hover:bg-foreground/90 font-semibold rounded-xl py-6"
                 >
-                  Start On-Ramp
+                  Start Savings Investment
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Off-Ramp */}
+            {/* Crypto Investment */}
             <Card className="shadow-apple-lg border-0 overflow-hidden group hover:shadow-glow transition-all">
               <CardContent className="pt-8">
                 <div className="flex items-start justify-between mb-6">
                   <div className="p-4 bg-foreground rounded-2xl">
-                    <ArrowDownRight className="h-10 w-10 text-background" />
+                    <TrendingUp className="h-10 w-10 text-background" />
                   </div>
                   <Badge className="bg-muted font-semibold px-3 py-1">
-                    {loading ? '...' : stats?.offramp_count || 0} Completed
+                    Higher Returns
                   </Badge>
                 </div>
-                <h3 className="text-3xl font-bold mb-4">Off-Ramp</h3>
+                <h3 className="text-3xl font-bold mb-4">Crypto Investment</h3>
                 <p className="text-muted-foreground mb-6">
-                  Sell HBAR and receive KES via M-Pesa. Min: 2 HBAR or 25 KES, Max: 150,000 KES per transaction.
+                  Invest in cryptocurrency with higher potential returns. 
+                  Your investment is locked until graduation with market-based returns.
                 </p>
                 <ul className="space-y-2 mb-6">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5" />
-                    <span className="text-sm">Send HBAR from wallet</span>
+                    <span className="text-sm">Market-based returns</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5" />
-                    <span className="text-sm">Receive KES via M-Pesa</span>
+                    <span className="text-sm">Locked until graduation</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5" />
-                    <span className="text-sm">Fast processing</span>
+                    <span className="text-sm">Higher growth potential</span>
                   </li>
                 </ul>
                 <Button 
-                  onClick={() => navigate(wallet.isConnected ? '/mpesa?tab=offramp' : '/welcome')} 
+                  onClick={() => navigate(wallet.isConnected ? '/investments' : '/welcome')} 
                   className="w-full bg-foreground text-background hover:bg-foreground/90 font-semibold rounded-xl py-6"
                 >
-                  Start Off-Ramp
+                  Start Crypto Investment
                 </Button>
               </CardContent>
             </Card>
